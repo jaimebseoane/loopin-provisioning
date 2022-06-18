@@ -1,0 +1,19 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="upload-ova-to-library" type="ShConfigurationType">
+    <option name="SCRIPT_TEXT" value="terraform apply --auto-approve" />
+    <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
+    <option name="SCRIPT_PATH" value="$PROJECT_DIR$/$ENV$/$PROD_TARGET$/$TECHNOLOGY$/$PACKER_PLUGIN$/templates/$OS_BUILD$/$OS_BUILD_VER_MAYOR$" />
+    <option name="SCRIPT_OPTIONS" value="" />
+    <option name="INDEPENDENT_SCRIPT_WORKING_DIRECTORY" value="true" />
+    <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$/$ENV$/$PROD_TARGET$/terraform/vsphere-content" />
+    <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
+    <option name="INTERPRETER_PATH" value="/usr/local/bin/$TECHNOLOGY$" />
+    <option name="INTERPRETER_OPTIONS" value="init" />
+    <option name="EXECUTE_IN_TERMINAL" value="true" />
+    <option name="EXECUTE_SCRIPT_FILE" value="false" />
+    <envs />
+    <method v="2">
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="init-terraform" run_configuration_type="ShConfigurationType" />
+    </method>
+  </configuration>
+</component>

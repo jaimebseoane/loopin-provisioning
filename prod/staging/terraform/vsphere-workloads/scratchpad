@@ -1,0 +1,245 @@
+
+/*
+
+module "vms" {
+  source          = "./modules/vpshere-dc/vms"
+  for_each        = var.testing.layers
+  vm_folder       = "${var.testing.name}/${each.value.name}"
+  vm_name         = "${each.value.name}01"
+  vapp_properties = {
+    instance-id = random_uuid.instance.id
+    public-keys = var.authorized_key
+    hostname    = "${each.value.name}01"
+    user-data   = base64encode(data.template_file.userdata[each.key].rendered)
+  }
+}
+
+*/
+
+/*
+data "template_file" "userdata" {
+  for_each = {for idx, layer in var.workloads.segments : idx => layer}
+
+  template = file("${path.module}/userdata.yml.tpl")
+  vars     = {
+    vm_ip_address  = each.value
+    vm_netmask     = var.vm_netmask
+    vm_gateway     = "${var.network_id}${var.vm_gateway}"
+    vm_dns_servers = "${var.dns_servers.local_dns}, ${var.dns_servers.public_dns}"
+    vm_dns_search  = "${var.subdomain}.${var.domain}"
+  }
+}
+*/
+
+
+/*
+module "vms" {
+  source          = "./modules/vpshere-dc/vms"
+  count           = var.vm_count
+  vm_count        = var.vm_count
+  vm_folder       = var.vm_folder
+  vm_name         = "${var.vm_name}${count.index + 1}"
+  vapp_properties = {
+    instance-id = random_uuid.instance.id
+    public-keys = var.authorized_key
+    hostname    = "${var.vm_name}${count.index + 1}"
+    user-data   = base64encode(data.template_file.userdata[count.index].rendered)
+  }
+}
+
+*/
+
+/*
+data "template_file" "userdata" {
+  for_each = {for idx, layer in var.workloads.segments : idx => layer}
+
+  template = file("${path.module}/userdata.yml.tpl")
+  vars     = {
+    vm_ip_address  = each.value
+    vm_netmask     = var.vm_netmask
+    vm_gateway     = "${var.network_id}${var.vm_gateway}"
+    vm_dns_servers = "${var.dns_servers.local_dns}, ${var.dns_servers.public_dns}"
+    vm_dns_search  = "${var.subdomain}.${var.domain}"
+  }
+}
+
+
+module "vapp" {
+  source          = "./vapp"
+  count           = var.vm_count
+  vapp_properties = {
+    instance-id = random_uuid.instance.id
+    public-keys = var.authorized_key
+    hostname    = "${var.vapp_properties.hostname}0${count.index + 1}"
+    #    user-data   = base64encode(data.template_file.userdata[each.key].rendered)
+  }
+}
+*/
+
+
+
+  datacenter = "Datacenter"
+  cluster    = "Cluster"fnet
+  datastore  = "vsanDatastore"
+  network    = "tfc-gcve-qa-gcp-workload-segment1"
+  vm_count    = 3
+
+  vm_template         = "ubuntu-20.04-cloud-template-vm"
+  template_disk_count = length(data.vsphere_virtual_machine.template.disks)
+
+  name      = "dns"
+#  vm_folder = vsphere_folder.dns.path
+  vm_folder = "workloads/dns"
+
+  # vm networking
+  ip_address  = "10.90.8.13"
+  netmask     = "24"
+  gateway     = "10.90.8.1"
+  dns_servers = "10.90.0.9, 8.8.8.8"
+  dns_search = [
+    "ss4.nepgroup.io"
+  ]
+  domain = "ss4.nepgroup.io"
+
+  # vm resources
+  num_cpus             = "2"
+  num_cores_per_socket = "2"
+  memory               = "2048"
+  disk_sizes           = [40]
+
+
+/*
+
+vm_template = local.vm_template
+datastore   = local.datastore
+network     = local.network
+disk_sizes  = local.disk_sizes
+
+terraform.tfvars
+num_cpus             = local.num_cpus
+num_cores_per_socket = local.num_cores_per_socket
+memory               = local.memory
+datacenter           = local.datacenter
+cluster              = local.cluster
+vm_folder            = local.vm_folder
+vapp_properties = {
+  "instance-id" = random_uuid.instance.id,
+  "hostname"    = "${local.name}${count.index + 1}",
+  "public-keys" = var.authorized_key,
+  "user-data"   = base64encode(data.template_file.userdata[count.index].rendered)
+
+*/
+
+/*
+variable "workloads" {
+  description = "For all dynamic settings for all VMs in a DC"
+  type        = object({
+    name            = string
+    ipv4_gateway    = string
+    ipv4_netmask    = string
+    dns_server_list = list(string)
+    dns_suffix_list = list(string)
+    domain          = string
+    layers          = map(list(string))
+  })
+  default = {
+    name            = "workloads"
+    ipv4_gateway    = "10.90.8.1"
+    ipv4_netmask    = "24"
+    dns_server_list = ["10.90.0.9", "8.8.8.8"]
+    dns_suffix_list = ["ss4.nepgroup.io"]
+    domain          = "ss4.nepgroup.io",
+    layers          = {
+      dns        = ["dns", "10.90.8.13"]
+      config_managers = ["config-manager","10.90.8.10"]
+      loadblancers = ["loadbalancer", "10.90.8.11"]
+      databases = ["mariadb","10.90.8.12"]
+      monitoring = ["monitor", "10.90.8.3"]
+      controllers = ["rancher","10.90.8.1"]
+      applications = ["tfc","10.90.8.2"]
+    }
+  }
+}
+
+*/
+
+variable "layer_index" {
+  description = "Indicates the current layer being provisioned"
+  type        = list(string)
+  default     = []
+}
+
+/*
+variable "testing" {
+  description = "For all dynamic settings for all VMs in a DC"
+  type        = object({
+    name   = string
+    layers = map(map(string))
+  })
+  default = {
+    name   = "workloads"
+    layers = {
+      0 = {
+        name            = "dns"
+        ip_subnet_start = "10.90.8.130"
+      }
+      1 = {
+        name            = "monitoring"
+        ip_subnet_start = "10.90.8.30"
+      }
+    }
+  }
+}
+
+/*
+variable "workloads" {
+  description = "For all dynamic settings for all VMs in a DC"
+  type        = object({
+    name   = string
+    layers = list(string)
+  })
+  default = {
+    name   = "workloads"
+    layers = [
+      "dns",
+      "config-managers",
+      "loadbalancers",
+      "databases",
+      "monitoring",
+      "controllers",
+      "applications"
+    ]
+
+  }
+}
+
+*/
+
+/*
+variable "workloads" {
+  description = "For all dynamic settings for all VMs in a DC"
+  type        = object({
+    name     = string
+    layers   = list(string)
+    segments = list(string)
+  })
+  default = {
+    name   = "workloads"
+    layers = [
+      "dns",
+      "monitoring"
+    ]
+    segments = [
+      "10.90.8.13",
+      "10.90.8.31"
+    ]
+  }
+}
+*/
+
+  /*
+    vapp {
+      properties = var.vapp_properties
+    }
+
+   */
